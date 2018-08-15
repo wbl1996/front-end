@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>懒加载</title>
+    <style>
+        .container{
+            width: 600px;
+            margin:0 auto;
+        }
+        ul,li{
+            list-style: none;
+        }
+        .container li{
+            float:left;
+            margin:10px 10px;
+        }
+        .container img{
+            width:600px;
+            height:400px;
+        }
+    </style>
+</head>
+<body>
+<ul class="container">
+    <li><a href="#"><img src="" data-src="image/4.jpg"></a></li>
+    <li><a href="#"><img src="" data-src="image/5.jpg"></a></li>
+    <li><a href="#"><img src="" data-src="image/6.jpg"></a></li>
+    <li><a href="#"><img src="" data-src="image/7.jpg"></a></li>
+</ul>
+<script type="application/javascript" src="js/jquery-3.3.1.min.js"></script>
+<!--<script type="application/javascript" src="js/jquery.lazyload.min.js"></script>-->
+<script>
+    var lazyLoad = (function(){
+        var clock;
+        function init(){
+            $(window).on("scroll", function(){   //给scroll事件绑定方法
+                if (clock) {               //如果clock存在一个值，那就把该值清除
+                    clearTimeout(clock);
+                }
+                clock = setTimeout(function(){
+                    checkShow();
+                }, 200);      //200ms后执行checkShow函数，即滚轮停止后200ms后判断
+            })
+            checkShow();
+        }
+
+        function checkShow(){  //检查是否已加载
+            $(".container img").each(function(){
+                var $cur =$(this);
+                if($cur.attr('isLoaded')){    //展示图片时增加isLoaded属性
+                    return;
+                }
+                if(shouldShow($cur)){
+                    showImg($cur);
+                }
+            })
+        }
+        function shouldShow($node){       //$node是当前的图片
+            var scrollH = $(window).scrollTop(),    // 窗口滚动条向下滚过的距离
+                winH = $(window).height(),          //网页的高度
+                top = $node.offset().top;           //当前图片相对于document的距离
+            if(top < winH + scrollH){    //winH+scrollH是指当前页面底部距离最开始时页面的顶部的距离，也就是说下一张图片开始出现的时
+                return true;
+            }else{
+                return false;
+            }
+        }
+        function showImg($node){
+            $node.attr('src', $node.attr('data-src'));
+            $node.attr('isLoaded', true);     //增加isLoaded属性为以后做判断
+        }
+        return {
+            init: init
+        }
+    })()
+    lazyLoad.init();
+
+</script>
+</body>
+</html>
